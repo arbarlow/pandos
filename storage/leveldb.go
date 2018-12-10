@@ -2,7 +2,9 @@ package storage
 
 import (
 	"encoding/binary"
+	"errors"
 
+	"github.com/arbarlow/pandos/pandos"
 	"github.com/coreos/etcd/raft"
 	pb "github.com/coreos/etcd/raft/raftpb"
 	"github.com/gogo/protobuf/proto"
@@ -24,12 +26,17 @@ func NewLevelDB(dir string) (*LevelDB, error) {
 }
 
 // Append writes thing to the commit log
-func (l *LevelDB) Append(entries []pb.Entry) error {
+func (l *LevelDB) Append(entries []*pb.Entry) error {
 	batch := new(leveldb.Batch)
 	for _, e := range entries {
 		k := make([]byte, 8)
 		binary.LittleEndian.PutUint64(k, uint64(e.Index))
-		batch.Put(k, e.Data)
+		b, err := proto.Marshal(e)
+		if err != nil {
+			return err
+		}
+
+		batch.Put(k, b)
 	}
 
 	return l.db.Write(batch, nil)
@@ -40,8 +47,9 @@ func (l *LevelDB) Close() error {
 	return l.db.Close()
 }
 
+// InitialState returns the initial state of the db
 func (l *LevelDB) InitialState() (pb.HardState, pb.ConfState, error) {
-	panic("not implemented")
+	return pb.HardState{}, pb.ConfState{}, nil
 }
 
 // Entries returns a range of k,v for keys lo and hi
@@ -55,6 +63,8 @@ func (l *LevelDB) Entries(lo uint64, hi uint64, maxSize uint64) ([]pb.Entry, err
 	entries := []pb.Entry{}
 
 	iter := l.db.NewIterator(&util.Range{Start: startKey, Limit: endKey}, nil)
+	defer iter.Release()
+
 	for iter.Next() {
 		e := pb.Entry{}
 		err := proto.Unmarshal(iter.Value(), &e)
@@ -64,24 +74,124 @@ func (l *LevelDB) Entries(lo uint64, hi uint64, maxSize uint64) ([]pb.Entry, err
 
 		entries = append(entries, e)
 	}
-	iter.Release()
 
 	err := iter.Error()
 	return entries, err
 }
 
+// Term returns the term for given index
 func (l *LevelDB) Term(i uint64) (uint64, error) {
-	panic("not implemented")
+	k := make([]byte, 8)
+	binary.LittleEndian.PutUint64(k, uint64(i))
+	data, err := l.db.Get(k, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	e := pb.Entry{}
+	err = proto.Unmarshal(data, &e)
+	if err != nil {
+		return 0, err
+	}
+
+	return e.Term, nil
 }
 
+// LastIndex returns the last index in the DB
 func (l *LevelDB) LastIndex() (uint64, error) {
-	panic("not implemented")
+	iter := l.db.NewIterator(&util.Range{Start: nil, Limit: nil}, nil)
+	defer iter.Release()
+	iter.Last()
+	iter.Prev()
+
+	for iter.Next() {
+		key := binary.LittleEndian.Uint64(iter.Key())
+		return key, nil
+	}
+
+	return 0, errors.New("LastIndex: No keys in DB")
 }
 
+// FirstIndex returns the last index in the DB
 func (l *LevelDB) FirstIndex() (uint64, error) {
-	panic("not implemented")
+	iter := l.db.NewIterator(&util.Range{Start: nil, Limit: nil}, nil)
+	defer iter.Release()
+
+	for iter.Next() {
+		key := binary.LittleEndian.Uint64(iter.Key())
+		return key, nil
+	}
+
+	return 0, errors.New("LastIndex: No keys in DB")
 }
 
+// Snapshot makes a copy of the DB in it's current state
+// for transport over the wire
 func (l *LevelDB) Snapshot() (pb.Snapshot, error) {
-	panic("not implemented")
+	s, err := l.db.GetSnapshot()
+	if err != nil {
+		return pb.Snapshot{}, err
+	}
+
+	// Fetch all keys
+	iter := s.NewIterator(&util.Range{Start: nil, Limit: nil}, nil)
+	defer iter.Release()
+
+	entries := []*pb.Entry{}
+
+	for iter.Next() {
+		e := &pb.Entry{}
+		err := proto.Unmarshal(iter.Value(), e)
+		if err != nil {
+			return pb.Snapshot{}, err
+		}
+
+		entries = append(entries, e)
+	}
+
+	err = iter.Error()
+	if err != nil {
+		return pb.Snapshot{}, err
+	}
+
+	err = iter.Error()
+	if err != nil {
+		return pb.Snapshot{}, err
+	}
+
+	sd := pandos.SnapshotData{}
+	sd.Entries = entries
+
+	b, err := proto.Marshal(&sd)
+	if err != nil {
+		return pb.Snapshot{}, err
+	}
+
+	lastIndex := uint64(0)
+	lastTerm := uint64(0)
+	if len(entries) > 0 {
+		lastIndex = entries[len(entries)-1].Index
+		lastTerm = entries[len(entries)-1].Term
+	}
+
+	snap := pb.Snapshot{
+		Data: b,
+		Metadata: pb.SnapshotMetadata{
+			Term:  lastTerm,
+			Index: lastIndex,
+		},
+	}
+
+	return snap, err
+}
+
+// LoadSnapshot loads a snapshot ready for use
+func (l *LevelDB) LoadSnapshot(s pb.Snapshot) error {
+	sd := pandos.SnapshotData{}
+	err := proto.Unmarshal(s.Data, &sd)
+	if err != nil {
+		return err
+	}
+
+	return l.Append(sd.Entries)
 }

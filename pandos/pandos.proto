@@ -1,8 +1,12 @@
 syntax = "proto3";
 package pandos;
 
-import "../vendor/github.com/coreos/etcd/raft/raftpb/raft.proto";
+import "github.com/coreos/etcd/raft/raftpb/raft.proto";
 import "google/protobuf/empty.proto";
+
+message SnapshotData {
+  repeated raftpb.Entry entries = 1;
+}
 
 service PandosGossip {
     rpc Receive(raftpb.Message) returns (google.protobuf.Empty) {};
