@@ -12,6 +12,9 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
+const hardStateKey = -1
+const confStateKey = -2
+
 // LevelDB implements a simple LevelDB database on disk for use with Raft
 type LevelDB struct {
 	raft.Storage
@@ -26,12 +29,12 @@ func NewLevelDB(dir string) (*LevelDB, error) {
 }
 
 // Append writes thing to the commit log
-func (l *LevelDB) Append(entries []*pb.Entry) error {
+func (l *LevelDB) Append(entries []pb.Entry) error {
 	batch := new(leveldb.Batch)
 	for _, e := range entries {
 		k := make([]byte, 8)
 		binary.LittleEndian.PutUint64(k, uint64(e.Index))
-		b, err := proto.Marshal(e)
+		b, err := proto.Marshal(&e)
 		if err != nil {
 			return err
 		}
@@ -45,6 +48,30 @@ func (l *LevelDB) Append(entries []*pb.Entry) error {
 // Close closes the DB and stops all writes
 func (l *LevelDB) Close() error {
 	return l.db.Close()
+}
+
+// SetHardState saves the current HardState.
+func (l *LevelDB) SetHardState(st pb.HardState) error {
+	hsb, err := proto.Marshal(&st)
+	if err != nil {
+		return err
+	}
+
+	k := make([]byte, 8)
+	binary.PutVarint(k, hardStateKey)
+	return l.db.Put(k, hsb, nil)
+}
+
+// SetConfState saves the current ConfigState.
+func (l *LevelDB) SetConfState(st pb.ConfState) error {
+	cfb, err := proto.Marshal(&st)
+	if err != nil {
+		return err
+	}
+
+	k := make([]byte, 8)
+	binary.PutVarint(k, confStateKey)
+	return l.db.Put(k, cfb, nil)
 }
 
 // InitialState returns the initial state of the db
@@ -154,11 +181,6 @@ func (l *LevelDB) Snapshot() (pb.Snapshot, error) {
 		return pb.Snapshot{}, err
 	}
 
-	err = iter.Error()
-	if err != nil {
-		return pb.Snapshot{}, err
-	}
-
 	sd := pandos.SnapshotData{}
 	sd.Entries = entries
 
@@ -193,5 +215,5 @@ func (l *LevelDB) LoadSnapshot(s pb.Snapshot) error {
 		return err
 	}
 
-	return l.Append(sd.Entries)
+	return nil // l.Append(sd.Entries)
 }
