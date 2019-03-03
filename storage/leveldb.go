@@ -7,13 +7,12 @@ package storage
 
 import (
 	"encoding/binary"
-	"errors"
 
 	"github.com/arbarlow/pandos/pandos"
-	pb "github.com/coreos/etcd/raft/raftpb"
 	"github.com/gogo/protobuf/proto"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
+	pb "go.etcd.io/etcd/raft/raftpb"
 )
 
 const hardStateKey = -1
@@ -139,7 +138,7 @@ func (l *LevelDB) LastIndex() (uint64, error) {
 		return key, nil
 	}
 
-	return 0, errors.New("LastIndex: No keys in DB")
+	return 0, nil
 }
 
 // FirstIndex returns the last index in the DB
@@ -152,7 +151,7 @@ func (l *LevelDB) FirstIndex() (uint64, error) {
 		return key, nil
 	}
 
-	return 0, errors.New("LastIndex: No keys in DB")
+	return 0, nil
 }
 
 // Snapshot makes a copy of the DB in it's current state

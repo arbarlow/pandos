@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/arbarlow/pandos/storage"
-	pb "github.com/coreos/etcd/raft/raftpb"
+	pb "go.etcd.io/etcd/raft/raftpb"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 )

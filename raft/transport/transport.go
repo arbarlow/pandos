@@ -6,8 +6,8 @@ import (
 	"net"
 
 	"github.com/arbarlow/pandos/pandos"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft/raftpb"
+	"go.etcd.io/etcd/pkg/types"
+	"go.etcd.io/etcd/raft/raftpb"
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 )

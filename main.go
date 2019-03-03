@@ -2,12 +2,16 @@ package main
 
 import (
 	"math/rand"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/arbarlow/pandos/log"
+	"github.com/arbarlow/pandos/raft"
+	"go.etcd.io/etcd/raft/raftpb"
+	"go.uber.org/zap"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -52,18 +56,26 @@ func main() {
 	log.PrintStartupInfo(strconv.FormatUint(id, 10), *verbose, storage,
 		*advertiseHost, *port, *peer)
 
-	// proposeC := make(chan string)
-	// defer close(proposeC)
-	// confChangeC := make(chan raftpb.ConfChange)
-	// defer close(confChangeC)
+	proposeC := make(chan string)
+	defer close(proposeC)
+	confChangeC := make(chan raftpb.ConfChange)
+	defer close(confChangeC)
 
-	// errorC := raft.NewRaftNode(
-	// 	int(id),
-	// 	[]string{*peer},
-	// 	(peer != nil),
-	// 	proposeC,
-	// 	confChangeC,
-	// )
+	errorC, hndlr := raft.NewRaftNode(
+		id,
+		[]string{},
+		(peer != nil),
+		proposeC,
+		confChangeC,
+	)
 
-	// <-errorC
+	go func() {
+		err := http.ListenAndServe(":"+*port, hndlr)
+		if err != nil {
+			log.Logger().Fatal("http server error", zap.Error(err))
+		}
+	}()
+
+	err := <-errorC
+	log.Logger().Fatal("raft quit", zap.Error(err))
 }

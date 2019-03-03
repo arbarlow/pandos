@@ -3,16 +3,17 @@ package raft
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/arbarlow/pandos/log"
-	"github.com/arbarlow/pandos/raft/transport"
 	"github.com/arbarlow/pandos/storage"
-	"github.com/coreos/etcd/pkg/types"
-	"github.com/coreos/etcd/raft"
-	"github.com/coreos/etcd/raft/raftpb"
 	"go.etcd.io/etcd/etcdserver/api/rafthttp"
+	stats "go.etcd.io/etcd/etcdserver/api/v2stats"
+	"go.etcd.io/etcd/pkg/types"
+	"go.etcd.io/etcd/raft"
+	"go.etcd.io/etcd/raft/raftpb"
 	"go.uber.org/zap"
 )
 
@@ -21,7 +22,7 @@ var defaultSnapshotCount uint64 = 10000
 type raftNode struct {
 	node      raft.Node
 	storage   *storage.LevelDB
-	transport *transport.Transport
+	transport *rafthttp.Transport
 	logger    *zap.Logger
 
 	proposeC    <-chan string            // proposed message to log
@@ -52,7 +53,7 @@ func NewRaftNode(
 	peers []string,
 	join bool,
 	proposeC <-chan string,
-	confChangeC <-chan raftpb.ConfChange) <-chan error {
+	confChangeC <-chan raftpb.ConfChange) (<-chan error, http.Handler) {
 
 	l := log.Logger()
 	errorC := make(chan error)
@@ -60,7 +61,7 @@ func NewRaftNode(
 	db, err := storage.NewLevelDB(dir)
 	if err != nil {
 		errorC <- err
-		return errorC
+		return errorC, nil
 	}
 
 	rc := &raftNode{
@@ -70,8 +71,9 @@ func NewRaftNode(
 		storage: db,
 		logger:  l,
 
-		proposeC: proposeC,
-		errorC:   errorC,
+		proposeC:    proposeC,
+		confChangeC: confChangeC,
+		errorC:      errorC,
 
 		snapCount: defaultSnapshotCount,
 		stopc:     make(chan struct{}),
@@ -83,19 +85,19 @@ func NewRaftNode(
 		ClusterID:   0x1000,
 		Raft:        rc,
 		ServerStats: stats.NewServerStats("", ""),
-		LeaderStats: stats.NewLeaderStats(strconv.Itoa(rc.id)),
-		ErrorC:      make(chan error),
+		LeaderStats: stats.NewLeaderStats(strconv.FormatInt(int64(rc.id), 10)),
+		ErrorC:      errorC,
 	}
 
 	rc.transport.Start()
 	for i := range rc.peers {
-		if i+1 != rc.id {
+		if i+1 != int(rc.id) {
 			rc.transport.AddPeer(types.ID(i+1), []string{rc.peers[i]})
 		}
 	}
 
 	go rc.startRaft()
-	return errorC
+	return errorC, rc.transport.Handler()
 }
 
 func (rc *raftNode) startRaft() {
@@ -336,9 +338,9 @@ func (rc *raftNode) publishSnapshot(snapshotToSave raftpb.Snapshot) {
 // 	rc.snapshotIndex = rc.appliedIndex
 // }
 
-// func (rc *raftNode) Process(ctx context.Context, m raftpb.Message) error {
-// 	return rc.node.Step(ctx, m)
-// }
-// func (rc *raftNode) IsIDRemoved(id uint64) bool                           { return false }
-// func (rc *raftNode) ReportUnreachable(id uint64)                          {}
-// func (rc *raftNode) ReportSnapshot(id uint64, status raft.SnapshotStatus) {}
+func (rc *raftNode) Process(ctx context.Context, m raftpb.Message) error {
+	return rc.node.Step(ctx, m)
+}
+func (rc *raftNode) IsIDRemoved(id uint64) bool                           { return false }
+func (rc *raftNode) ReportUnreachable(id uint64)                          {}
+func (rc *raftNode) ReportSnapshot(id uint64, status raft.SnapshotStatus) {}

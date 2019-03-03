@@ -6,7 +6,7 @@ package pandos
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import raftpb "github.com/coreos/etcd/raft/raftpb"
+import raftpb "go.etcd.io/etcd/raft/raftpb"
 import empty "github.com/golang/protobuf/ptypes/empty"
 
 import (
