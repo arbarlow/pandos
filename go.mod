@@ -1,35 +1,71 @@
 module github.com/arbarlow/pandos
 
 require (
-	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
-	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
-	github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973 // indirect
-	github.com/coreos/etcd v3.3.10+incompatible
-	github.com/coreos/go-semver v0.2.0 // indirect
-	github.com/coreos/go-systemd v0.0.0-20180511133405-39ca1b05acc7 // indirect
-	github.com/coreos/pkg v0.0.0-20180108230652-97fdf19511ea // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dustin/go-humanize v0.0.0-20180713052910-9f541cc9db5d // indirect
-	github.com/gogo/protobuf v1.1.0
-	github.com/golang/protobuf v1.2.0
-	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
-	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_golang v0.8.0 // indirect
-	github.com/prometheus/client_model v0.0.0-20180712105110-5c3871d89910 // indirect
-	github.com/prometheus/common v0.0.0-20180518154759-7600349dcfe1 // indirect
-	github.com/prometheus/procfs v0.0.0-20180705121852-ae68e2d4c00f // indirect
+	cloud.google.com/go v0.36.0 // indirect
+	dmitri.shuralyov.com/app/changes v0.0.0-20181114035150-5af16e21babb // indirect
+	dmitri.shuralyov.com/service/change v0.0.0-20190301072032-c25fb47d71b3 // indirect
+	git.apache.org/thrift.git v0.12.0 // indirect
+	github.com/Shopify/sarama v1.21.0 // indirect
+	github.com/coreos/etcd v3.3.12+incompatible
+	github.com/coreos/go-systemd v0.0.0-20190212144455-93d5ec2c7f76 // indirect
+	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
+	github.com/gliderlabs/ssh v0.1.3 // indirect
+	github.com/go-logfmt/logfmt v0.4.0 // indirect
+	github.com/gogo/protobuf v1.2.1
+	github.com/golang/lint v0.0.0-20190301231843-5614ed5bae6f // indirect
+	github.com/golang/protobuf v1.3.0
+	github.com/golang/snappy v0.0.1 // indirect
+	github.com/google/pprof v0.0.0-20190228041337-2ef8d84b2e3c // indirect
+	github.com/googleapis/gax-go v2.0.2+incompatible // indirect
+	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
+	github.com/gorilla/mux v1.7.0 // indirect
+	github.com/gregjones/httpcache v0.0.0-20190212212710-3befbb6ad0cc // indirect
+	github.com/grpc-ecosystem/grpc-gateway v1.8.1 // indirect
+	github.com/kisielk/errcheck v1.2.0 // indirect
+	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
+	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
+	github.com/openzipkin/zipkin-go v0.1.5 // indirect
+	github.com/pkg/errors v0.8.1 // indirect
+	github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90 // indirect
+	github.com/prometheus/common v0.2.0 // indirect
+	github.com/prometheus/procfs v0.0.0-20190227231451-bbced9601137 // indirect
+	github.com/rogpeppe/fastuuid v1.0.0 // indirect
+	github.com/russross/blackfriday v2.0.0+incompatible // indirect
 	github.com/sanity-io/litter v1.1.0 // indirect
 	github.com/satori/go.uuid v1.2.0
-	github.com/stretchr/testify v1.2.2
-	github.com/syndtr/goleveldb v0.0.0-20180815032940-ae2bd5eed72d
-	github.com/xiang90/probing v0.0.0-20160813154853-07dd2e8dfe18 // indirect
-	go.uber.org/atomic v1.3.2 // indirect
-	go.uber.org/multierr v1.1.0 // indirect
-	go.uber.org/zap v1.8.0
-	golang.org/x/net v0.0.0-20181106065722-10aee1819953
-	golang.org/x/time v0.0.0-20180412165947-fbb02b2291d2 // indirect
-	google.golang.org/genproto v0.0.0-20181202183823-bd91e49a0898 // indirect
-	google.golang.org/grpc v1.16.0
+	github.com/shurcooL/go v0.0.0-20190121191506-3fef8c783dec // indirect
+	github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d // indirect
+	github.com/shurcooL/highlight_diff v0.0.0-20181222201841-111da2e7d480 // indirect
+	github.com/shurcooL/highlight_go v0.0.0-20181215221002-9d8641ddf2e1 // indirect
+	github.com/shurcooL/home v0.0.0-20190204141146-5c8ae21d4240 // indirect
+	github.com/shurcooL/htmlg v0.0.0-20190120222857-1e8a37b806f3 // indirect
+	github.com/shurcooL/httpfs v0.0.0-20181222201310-74dc9339e414 // indirect
+	github.com/shurcooL/issues v0.0.0-20190120000219-08d8dadf8acb // indirect
+	github.com/shurcooL/issuesapp v0.0.0-20181229001453-b8198a402c58 // indirect
+	github.com/shurcooL/notifications v0.0.0-20181111060504-bcc2b3082a7a // indirect
+	github.com/shurcooL/octicon v0.0.0-20181222203144-9ff1a4cf27f4 // indirect
+	github.com/shurcooL/reactions v0.0.0-20181222204718-145cd5e7f3d1 // indirect
+	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
+	github.com/shurcooL/webdavfs v0.0.0-20181215192745-5988b2d638f6 // indirect
+	github.com/sirupsen/logrus v1.3.0 // indirect
+	github.com/stretchr/testify v1.3.0
+	github.com/syndtr/goleveldb v1.0.0
+	go.etcd.io/etcd v0.0.0-20190302072331-2c69559819d3
+	go.opencensus.io v0.19.0 // indirect
+	go.uber.org/zap v1.9.1
+	go4.org v0.0.0-20190218023631-ce4c26f7be8e // indirect
+	golang.org/x/build v0.0.0-20190301201919-f7b27185a0a4 // indirect
+	golang.org/x/crypto v0.0.0-20190228161510-8dd112bcdc25 // indirect
+	golang.org/x/exp v0.0.0-20190301171323-01c40f57f5f6 // indirect
+	golang.org/x/lint v0.0.0-20190301231843-5614ed5bae6f // indirect
+	golang.org/x/net v0.0.0-20190301231341-16b79f2e4e95
+	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421 // indirect
+	golang.org/x/perf v0.0.0-20190124201629-844a5f5b46f4 // indirect
+	golang.org/x/sys v0.0.0-20190303122642-d455e41777fc // indirect
+	golang.org/x/tools v0.0.0-20190228203856-589c23e65e65 // indirect
+	google.golang.org/genproto v0.0.0-20190227213309-4f5b463f9597 // indirect
+	google.golang.org/grpc v1.19.0
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
+	honnef.co/go/tools v0.0.0-20190215041234-466a0476246c // indirect
+	sourcegraph.com/sqs/pbtypes v1.0.0 // indirect
 )

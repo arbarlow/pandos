@@ -52,18 +52,15 @@ func main() {
 	log.PrintStartupInfo(strconv.FormatUint(id, 10), *verbose, storage,
 		*advertiseHost, *port, *peer)
 
-	// getSnapshot := func() ([]byte, error) { return []byte{}, nil }
-
 	// proposeC := make(chan string)
 	// defer close(proposeC)
 	// confChangeC := make(chan raftpb.ConfChange)
 	// defer close(confChangeC)
 
-	// _, errorC, _ := raft.NewRaftNode(
+	// errorC := raft.NewRaftNode(
 	// 	int(id),
 	// 	[]string{*peer},
 	// 	(peer != nil),
-	// 	getSnapshot,
 	// 	proposeC,
 	// 	confChangeC,
 	// )

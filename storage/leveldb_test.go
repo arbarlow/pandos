@@ -23,7 +23,7 @@ func TestLevelDBInterface(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	ents := []*pb.Entry{
+	ents := []pb.Entry{
 		{Index: 3, Term: 1},
 		{Index: 4, Term: 2},
 		{Index: 5, Term: 3},

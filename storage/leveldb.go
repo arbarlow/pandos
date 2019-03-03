@@ -1,3 +1,8 @@
+// This is leveldb basic implementation and is the first implementation
+// of storage. It is NOT designed to be super performant, or memory effecient,
+// but should be fairly fast, and be useful for testing in the meantime without
+// the heavier dependencies of RocksDB
+
 package storage
 
 import (
@@ -5,7 +10,6 @@ import (
 	"errors"
 
 	"github.com/arbarlow/pandos/pandos"
-	"github.com/coreos/etcd/raft"
 	pb "github.com/coreos/etcd/raft/raftpb"
 	"github.com/gogo/protobuf/proto"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -17,7 +21,6 @@ const confStateKey = -2
 
 // LevelDB implements a simple LevelDB database on disk for use with Raft
 type LevelDB struct {
-	raft.Storage
 	db *leveldb.DB
 }
 
@@ -215,5 +218,11 @@ func (l *LevelDB) LoadSnapshot(s pb.Snapshot) error {
 		return err
 	}
 
-	return nil // l.Append(sd.Entries)
+	// Proto uses pointers, so here we deference
+	ent := make([]pb.Entry, len(sd.Entries))
+	for k, v := range sd.Entries {
+		ent[k] = *v
+	}
+
+	return l.Append(ent)
 }
